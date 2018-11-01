@@ -94,13 +94,8 @@ extension TMDBClient {
                     print("Could not find \(TMDBClient.JSONResponseKeys.RequestToken) in \(results)")
                     completionHandlerForToken(false, nil, "Login Failed (Request Token).")
                 }
-                
             }
-            
         }
-        
-        
- 
     }
     
     private func loginWithToken(_ requestToken: String?, hostViewController: UIViewController, completionHandlerForLogin: @escaping (_ success: Bool, _ errorString: String?) -> Void) {
@@ -123,31 +118,45 @@ extension TMDBClient {
     private func getSessionID(_ requestToken: String?, completionHandlerForSession: @escaping (_ success: Bool, _ sessionID: String?, _ errorString: String?) -> Void) {
         
         /* 1. Specify parameters, the API method, and the HTTP body (if POST) */
+        let parameters = [TMDBClient.ParameterKeys.RequestToken: requestToken!]
         /* 2. Make the request */
-        /* 3. Send the desired value(s) to completion handler */
-        
-        /*
-        
-        taskForGETMethod(method, parameters: parameters) { (results, error) in
-        
+        taskForGETMethod(Methods.AuthenticationSessionNew, parameters: parameters as [String : AnyObject]) {
+            (results, error) in
+            if let error = error {
+                print(error)
+                completionHandlerForSession(false, nil, "Login Failed (SessionID).")
+            } else {
+                if let sessionID =  results![TMDBClient.JSONResponseKeys.SessionID] as? String{
+                    completionHandlerForSession(true, sessionID, nil)
+                    //SessionID needs to be pulled out of results.
+                } else {
+                    print("Could not find \(TMDBClient.JSONResponseKeys.SessionID) in \(results)")
+                    completionHandlerForSession(false, nil, "Login Failed (SessionID).")
+                }
+            }
         }
-        
-        */
     }
     
     private func getUserID(_ completionHandlerForUserID: @escaping (_ success: Bool, _ userID: Int?, _ errorString: String?) -> Void) {
         
         /* 1. Specify parameters, the API method, and the HTTP body (if POST) */
-        /* 2. Make the request */
-        /* 3. Send the desired value(s) to completion handler */
+        let parameters = [TMDBClient.ParameterKeys.SessionID: TMDBClient.sharedInstance().sessionID!]
         
-        /*
-        
-        taskForGETMethod(method, parameters: parameters) { (results, error) in
-        
+        taskForGETMethod(Methods.Account, parameters: parameters as [String : AnyObject]) { (results, error) in
+            if let error = error {
+                print(error)
+                completionHandlerForUserID(false, nil, "Login Failed (UserID).")
+            } else {
+                if let userID =  results![TMDBClient.JSONResponseKeys.UserID] as? Int{
+                    completionHandlerForUserID(true, userID, nil)
+                    //SessionID needs to be pulled out of results.
+                } else {
+                    print("Could not find \(TMDBClient.JSONResponseKeys.UserID) in \(results)")
+                    completionHandlerForUserID(false, nil, "Login Failed (UserID).")
+                }
+            }
         }
-        
-        */
+
     }
     
     // MARK: GET Convenience Methods
